@@ -1,5 +1,5 @@
 [name]
-name = "amu-sru-api"
+name = "amusruapi"
 
 [vars]
 SRU_URL = "https://catalogue.univ-amu.fr/biblios"

@@ -1,0 +1,16 @@
+{
+  "name": "amu-sru-api",
+  "version": "1.0.0",
+  "description": "API REST pour interroger le serveur SRU",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.4.1"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

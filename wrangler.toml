@@ -1,0 +1,12 @@
+[name]
+name = "amu-sru-api"
+
+[vars]
+SRU_URL = "https://catalogue.univ-amu.fr/biblios"
+OPAC_URL = "https://catalogue.univ-amu.fr/cgi-bin/koha/opac-detail.pl"
+
+[build]
+command = "npm run build"
+[[build.env]]
+name = "NODE_VERSION"
+value = "18"

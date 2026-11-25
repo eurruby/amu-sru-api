@@ -96,6 +96,10 @@ export default {
 
       // Affichage de l'URL de requête SRU dans la console
       console.log("Requête SRU :", sruUrl.toString());
+      
+      // Log des variables d'environnement pour débogage
+      console.log("SRU_URL:", env.SRU_URL);
+      console.log("OPAC_URL:", env.OPAC_URL);
 
       const response = await fetch(sruUrl, {
         signal: AbortSignal.timeout(10000)

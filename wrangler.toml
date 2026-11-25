@@ -6,5 +6,3 @@ compatibility_date = "2024-11-01"
 SRU_URL = "https://catalogue.univ-amu.fr/biblios"
 OPAC_URL = "https://catalogue.univ-amu.fr/cgi-bin/koha/opac-detail.pl"
 
-[build]
-command = "npm run build"

@@ -30,6 +30,29 @@ function getBiblionumber(record) {
 
 export default {
   async fetch(request, env) {
+    // Vérification des variables d'environnement
+    if (!env.SRU_URL) {
+      console.error("SRU_URL non défini");
+      return new Response(JSON.stringify({ error: "Configuration manquante : SRU_URL" }), {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json; charset=utf-8"
+        }
+      });
+    }
+    
+    if (!env.OPAC_URL) {
+      console.error("OPAC_URL non défini");
+      return new Response(JSON.stringify({ error: "Configuration manquante : OPAC_URL" }), {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json; charset=utf-8"
+        }
+      });
+    }
+
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Content-Type": "application/json; charset=utf-8"
@@ -102,21 +125,31 @@ export default {
       console.log("OPAC_URL:", env.OPAC_URL);
 
       const response = await fetch(sruUrl, {
-        signal: AbortSignal.timeout(10000)
+        signal: AbortSignal.timeout(15000) // Augmentation du timeout à 15 secondes
       });
 
+      console.log("Status de la réponse SRU:", response.status);
+      console.log("Headers de la réponse SRU:", Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Erreur SRU:", response.status, errorText);
         return createJsonResponse({
-          error: "Erreur du serveur SRU"
+          error: "Erreur du serveur SRU",
+          status: response.status,
+          details: errorText
         }, 502);
       }
 
       const xml = await response.text();
+      console.log("Réponse XML reçue (taille):", xml.length);
+      
       const data = parser.parse(xml);
 
       const sru = data.searchRetrieveResponse;
 
       if (!sru) {
+        console.error("Réponse SRU invalide - aucun searchRetrieveResponse");
         return createJsonResponse({ error: "Réponse SRU invalide" }, 502);
       }
 
@@ -149,6 +182,7 @@ export default {
       });
 
     } catch (error) {
+      console.error("Erreur lors de l'appel SRU:", error.message);
       // Distinguer les types d'erreurs
       if (error.name === "AbortError") {
         return createJsonResponse({
@@ -158,12 +192,14 @@ export default {
       } else if (error instanceof TypeError) {
         return createJsonResponse({
           success: false,
-          error: "Erreur réseau - Impossible de contacter le serveur SRU"
+          error: "Erreur réseau - Impossible de contacter le serveur SRU",
+          details: error.message
         }, 502);
       } else {
         return createJsonResponse({
           success: false,
-          error: "Impossible d'interroger Koha"
+          error: "Impossible d'interroger Koha",
+          details: error.message
         }, 502);
       }
     }

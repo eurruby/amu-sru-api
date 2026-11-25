@@ -8,9 +8,9 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "fast-xml-parser": "^4.5.7"
+    "fast-xml-parser": "^5.12.1"
   },
   "devDependencies": {
-    "wrangler": "^3.114.17"
+    "wrangler": "^4.168.0"
   }
 }

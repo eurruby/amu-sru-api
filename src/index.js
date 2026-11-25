@@ -143,6 +143,7 @@ export default {
 
       const xml = await response.text();
       console.log("Réponse XML reçue (taille):", xml.length);
+      console.log("Contenu XML (premiers 500 caractères):", xml.substring(0, 500));
       
       const data = parser.parse(xml);
 
@@ -150,6 +151,7 @@ export default {
 
       if (!sru) {
         console.error("Réponse SRU invalide - aucun searchRetrieveResponse");
+        console.error("Structure de données parsée:", JSON.stringify(data, null, 2));
         return createJsonResponse({ error: "Réponse SRU invalide" }, 502);
       }
 

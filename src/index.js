@@ -16,30 +16,13 @@ function asArray(value) {
 function getBiblionumber(record) {
   const fields = asArray(record.controlfield);
 
+  // Chercher le biblionumber dans le champ 001 uniquement
   const field001 = fields.find(
     f => f["@_tag"] === "001"
   );
 
   if (field001 && field001["#text"]) {
     return String(field001["#text"]).trim();
-  }
-
-  const datafields = asArray(record.datafield);
-
-  const field999 = datafields.find(
-    f => f["@_tag"] === "999"
-  );
-
-  if (field999) {
-    const subfields = asArray(field999.subfield);
-
-    const subfieldC = subfields.find(
-      f => f["@_code"] === "c"
-    );
-
-    if (subfieldC && subfieldC["#text"]) {
-      return String(subfieldC["#text"]).trim();
-    }
   }
 
   return null;
@@ -52,7 +35,7 @@ export default {
       "Content-Type": "application/json; charset=utf-8"
     };
 
-    const json = (data, status = 200) =>
+    const createJsonResponse = (data, status = 200) =>
       new Response(JSON.stringify(data), {
         status,
         headers: corsHeaders
@@ -70,7 +53,7 @@ export default {
     }
 
     if (request.method !== "GET") {
-      return json({ error: "Méthode non autorisée" }, 405);
+      return createJsonResponse({ error: "Méthode non autorisée" }, 405);
     }
 
     const url = new URL(request.url);
@@ -78,15 +61,23 @@ export default {
     const issn = url.searchParams.get("issn");
 
     if ((!isbn && !issn) || (isbn && issn)) {
-      return json({
+      return createJsonResponse({
         error: "Fournir un ISBN ou un ISSN"
       }, 400);
     }
 
     const identifier = (isbn || issn).trim();
 
-    if (!/^[0-9Xx-]+$/.test(identifier)) {
-      return json({ error: "Identifiant invalide" }, 400);
+    // Validation stricte des ISBN et ISSN
+    const isbnRegex = /^97[89][0-9]{9}[\dXx]$/;
+    const issnRegex = /^\d{4}-\d{3}[Xx0-9]$/;
+    
+    if (isbn && !isbnRegex.test(identifier)) {
+      return createJsonResponse({ error: "ISBN invalide" }, 400);
+    }
+    
+    if (issn && !issnRegex.test(identifier)) {
+      return createJsonResponse({ error: "ISSN invalide" }, 400);
     }
 
     const limit = Math.min(
@@ -108,7 +99,7 @@ export default {
       });
 
       if (!response.ok) {
-        return json({
+        return createJsonResponse({
           error: "Erreur du serveur SRU"
         }, 502);
       }
@@ -119,7 +110,7 @@ export default {
       const sru = data.searchRetrieveResponse;
 
       if (!sru) {
-        return json({ error: "Réponse SRU invalide" }, 502);
+        return createJsonResponse({ error: "Réponse SRU invalide" }, 502);
       }
 
       const records = asArray(sru.records?.record);
@@ -142,7 +133,7 @@ export default {
         })
         .filter(Boolean);
 
-      return json({
+      return createJsonResponse({
         success: true,
         identifier,
         count: notices.length,
@@ -151,10 +142,23 @@ export default {
       });
 
     } catch (error) {
-      return json({
-        success: false,
-        error: "Impossible d'interroger Koha"
-      }, 502);
+      // Distinguer les types d'erreurs
+      if (error.name === "AbortError") {
+        return createJsonResponse({
+          success: false,
+          error: "Timeout - Demande trop longue"
+        }, 408);
+      } else if (error instanceof TypeError) {
+        return createJsonResponse({
+          success: false,
+          error: "Erreur réseau - Impossible de contacter le serveur SRU"
+        }, 502);
+      } else {
+        return createJsonResponse({
+          success: false,
+          error: "Impossible d'interroger Koha"
+        }, 502);
+      }
     }
   }
 };

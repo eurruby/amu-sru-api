@@ -94,6 +94,9 @@ export default {
       sruUrl.searchParams.set("maximumRecords", limit);
       sruUrl.searchParams.set("recordSchema", "marcxml");
 
+      // Affichage de l'URL de requête SRU dans la console
+      console.log("Requête SRU :", sruUrl.toString());
+
       const response = await fetch(sruUrl, {
         signal: AbortSignal.timeout(10000)
       });

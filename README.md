@@ -9,17 +9,17 @@ API REST pour interroger le serveur SRU de Koha et récupérer les notices bibli
 Récupère les notices correspondant à un ISBN ou ISSN.
 
 #### Paramètres
-- \`isbn\` (optionnel) : ISBN à rechercher
-- \`issn\` (optionnel) : ISSN à rechercher
-- \`limit\` (optionnel, défaut: 5) : Nombre maximum de résultats (1-20)
+- `isbn` (optionnel) : ISBN à rechercher
+- `issn` (optionnel) : ISSN à rechercher
+- `limit` (optionnel, défaut: 5) : Nombre maximum de résultats (1-20)
 
 #### Exemple de requête
-\`\`\`
+```
 GET /api/sru?isbn=9791037516909
-\`\`\`
+```
 
 #### Exemple de réponse
-\`\`\`json
+```json
 {
   "success": true,
   "identifier": "9791037516909",
@@ -32,7 +32,7 @@ GET /api/sru?isbn=9791037516909
     }
   ]
 }
-\`\`\`
+```
 
 ## Déploiement
 
